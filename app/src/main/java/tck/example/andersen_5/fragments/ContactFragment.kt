@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import tck.example.andersen_5.classes.Contact
@@ -20,7 +19,7 @@ private const val TAG = "ContactFragment"
 private const val CONTACT_ID = "contact_id"
 class ContactFragment: Fragment(){
     interface Callback{
-        fun onContactDeleted()
+        fun onContactReplaced()
     }
     private lateinit var contact: Contact
     private lateinit var firstName: EditText
@@ -28,7 +27,10 @@ class ContactFragment: Fragment(){
     private lateinit var phoneNumber:EditText
     private lateinit var contactId: UUID
     private lateinit var saveButton: Button
-
+    private var onSaveButtonPress:Boolean = false
+    private var firstNameEmpty = false
+    private var secondNameEmpty = false
+    private var phoneNumberEmpty = false
 
     private val contactViewModel: ContactViewModel by lazy {
         ViewModelProvider(this).get(ContactViewModel::class.java)
@@ -38,6 +40,7 @@ class ContactFragment: Fragment(){
         super.onAttach(context)
         callback = context as Callback?
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         contact = Contact()
@@ -57,7 +60,6 @@ class ContactFragment: Fragment(){
         secondName = view.findViewById(R.id.secondName)
         phoneNumber = view.findViewById(R.id.number)
         saveButton = view.findViewById(R.id.saveButton)
-
         return view
     }
 
@@ -75,16 +77,14 @@ class ContactFragment: Fragment(){
             })
 
         saveButton.setOnClickListener {
-            contactViewModel.saveContact(contact)
-            firstName.setText("")
-            secondName.setText("")
-            phoneNumber.setText("")
+            onSaveButtonPress = true
+            contactViewModel.updateContact(contact)
+            callback?.onContactReplaced()
         }
-
     }
+
     override fun onStart() {
         super.onStart()
-
         firstName.addTextChangedListener(object : TextWatcher{
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -117,7 +117,7 @@ class ContactFragment: Fragment(){
         return when (item.itemId){
             R.id.delete_contact -> {
                 contactViewModel.deleteContact(contactId)
-                callback?.onContactDeleted()
+                callback?.onContactReplaced()
                 true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -128,12 +128,23 @@ class ContactFragment: Fragment(){
         firstName.setText(contact.firstName)
         secondName.setText(contact.secondName)
         phoneNumber.setText(contact.phoneNumber)
+
+        firstNameEmpty = firstName.text.toString() == ""
+        secondNameEmpty = secondName.text.toString() == ""
+        phoneNumberEmpty = phoneNumber.text.toString() == ""
+        Log.d("TAG","firstname $firstNameEmpty ${firstName.text.toString()}," +
+                " secondname $secondNameEmpty ${secondName.text.toString()}," +
+                " phonenumber $phoneNumberEmpty ${phoneNumber.text.toString()}")
     }
 
     override fun onDetach() {
         super.onDetach()
+        if (!onSaveButtonPress) {
+            if (firstNameEmpty && secondNameEmpty && phoneNumberEmpty) contactViewModel.deleteContact(contactId)
+        }
         callback = null
     }
+
     companion object{
         fun newInstance(contactId: UUID):ContactFragment{
             val args = Bundle().apply {

@@ -15,10 +15,13 @@ class ContactViewModel:ViewModel() {
     var contactLiveData: LiveData<Contact?> = Transformations.switchMap(contactIdLiveData) { contactId ->
         contactRepository.getContact(contactId)
     }
+    fun addContact (contact: Contact){
+        contactRepository.addContact(contact)
+    }
     fun loadContact(contactId: UUID){
         contactIdLiveData.value = contactId
     }
-    fun saveContact(contact:Contact){
+    fun updateContact(contact:Contact){
         contactRepository.updateContact(contact)
     }
     fun deleteContact(contactId: UUID){

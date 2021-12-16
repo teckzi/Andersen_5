@@ -4,15 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import tck.example.andersen_5.MainActivity
 import tck.example.andersen_5.classes.Contact
 import tck.example.andersen_5.R
+import tck.example.andersen_5.adapter.ContactsListAdapter
 import tck.example.andersen_5.viewModel.ContactListViewModel
 import java.util.*
 
@@ -24,7 +22,6 @@ class ContactListFragment: Fragment() {
 
     private lateinit var contactRecyclerView: RecyclerView
     private var adapter: ContactsListAdapter? = ContactsListAdapter(emptyList())
-    private var emptyAdapter:EmptyAdapter = EmptyAdapter()
     private val contactListViewModel: ContactListViewModel by lazy {
         ViewModelProvider(this).get(ContactListViewModel::class.java)
     }
@@ -58,18 +55,18 @@ class ContactListFragment: Fragment() {
         setHasOptionsMenu(true)
     }
 
-    //Добавление в бд рандомных контактов для отображения при первом запуске
-//    private fun addDefaultContactsToDatabaseForFirstAppStart(){
-//        contactListViewModel.addContact(Contact(firstName = "1st Contact Name", secondName = "1st Contact SecondName", phoneNumber = "+72102102404"))
-//        contactListViewModel.addContact(Contact(firstName = "2st Contact Name", secondName = "2st Contact SecondName", phoneNumber = "+41291212489"))
-//        contactListViewModel.addContact(Contact (firstName = "3st Contact Name", secondName = "3st Contact SecondName", phoneNumber = "+21491287494"))
-//    }
-
     private fun updateUI(contacts: List<Contact>){
-        emptyAdapter = EmptyAdapter()
+        //Добавление дефолтного списка
+        if (contacts.isEmpty()) {
+            contactListViewModel.addContact(Contact(firstName = "1st Contact Name", secondName = "1st Contact SecondName", phoneNumber = "+72102102404"))
+            contactListViewModel.addContact(Contact(firstName = "2st Contact Name", secondName = "2st Contact SecondName", phoneNumber = "+41291212489"))
+            contactListViewModel.addContact(Contact (firstName = "3st Contact Name", secondName = "3st Contact SecondName", phoneNumber = "+21491287494"))
+            contactListViewModel.addContact(Contact (firstName = "4st Contact Name", secondName = "4st Contact SecondName", phoneNumber = "+59889202315"))
+            contactListViewModel.addContact(Contact (firstName = "5st Contact Name", secondName = "5st Contact SecondName", phoneNumber = "+54982909111"))
+            contactListViewModel.addContact(Contact (firstName = "6st Contact Name", secondName = "6st Contact SecondName", phoneNumber = "+895819901000"))
+        }
         adapter = ContactsListAdapter(contacts)
-        if (contacts.isEmpty()) contactRecyclerView.adapter = emptyAdapter
-        else contactRecyclerView.adapter = adapter
+        contactRecyclerView.adapter = adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -86,61 +83,6 @@ class ContactListFragment: Fragment() {
                 true
             }
             else -> return super.onOptionsItemSelected(item)
-        }
-    }
-
-    private inner class EmptyHolder(view: View): RecyclerView.ViewHolder(view){
-        private val emptyListButton: Button = itemView.findViewById(R.id.emptyListButton)
-        init {
-            emptyListButton.setOnClickListener {
-                val contact = Contact()
-                contactListViewModel.addContact(contact)
-                callbacks?.onContactSelected(contact.id)
-            }
-        }
-    }
-
-    private inner class EmptyAdapter : RecyclerView.Adapter<EmptyHolder>(){
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmptyHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.list_empty,parent,false)
-            return EmptyHolder(view)
-        }
-        override fun onBindViewHolder(holder: EmptyHolder, position: Int) {}
-        override fun getItemCount(): Int = 1
-    }
-
-    private inner class ContactHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener {
-        private lateinit var contact:Contact
-        private val firstNameTextView: TextView = itemView.findViewById(R.id.contactFirstname)
-        private val secondNameTextView: TextView = itemView.findViewById(R.id.contactSecondName)
-        private val phoneNumberTextView: TextView = itemView.findViewById(R.id.contactPhoneNumber)
-        init {
-            itemView.setOnClickListener(this)
-        }
-        fun bind(contact: Contact){
-            this.contact = contact
-            firstNameTextView.text = this.contact.firstName
-            secondNameTextView.text = this.contact.secondName
-            phoneNumberTextView.text = this.contact.phoneNumber
-        }
-
-        override fun onClick(view: View?) {
-            callbacks?.onContactSelected(contact.id)
-        }
-    }
-
-    private inner class ContactsListAdapter (var contact:List<Contact>): RecyclerView.Adapter<ContactHolder>(){
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item,parent,false)
-            return ContactHolder(view)
-        }
-        override fun onBindViewHolder(holder: ContactHolder, position: Int) {
-            val contact = contact[position]
-            holder.bind(contact)
-        }
-        override fun getItemCount(): Int {
-            return contact.size
         }
     }
 
