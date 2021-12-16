@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import tck.example.andersen_5.MainActivity
 import tck.example.andersen_5.classes.Contact
 import tck.example.andersen_5.R
 import tck.example.andersen_5.viewModel.ContactListViewModel
@@ -24,11 +25,6 @@ class ContactListFragment: Fragment() {
     private lateinit var contactRecyclerView: RecyclerView
     private var adapter: ContactsListAdapter? = ContactsListAdapter(emptyList())
     private var emptyAdapter:EmptyAdapter = EmptyAdapter()
-    private val startingContactsList = listOf(Contact(firstName = "1st Contact Name", secondName = "1st Contact SecondName", phoneNumber = "+72102102404"),
-        Contact(firstName = "2st Contact Name", secondName = "2st Contact SecondName", phoneNumber = "+41291212489"),
-        Contact(firstName = "3st Contact Name", secondName = "4st Contact SecondName", phoneNumber = "+21491287494"),
-        Contact(firstName = "4st Contact Name", secondName = "4st Contact SecondName", phoneNumber = "+10102849479")
-    )
     private val contactListViewModel: ContactListViewModel by lazy {
         ViewModelProvider(this).get(ContactListViewModel::class.java)
     }
@@ -56,16 +52,18 @@ class ContactListFragment: Fragment() {
                     Log.d(TAG, "Got contacts ${contacts.size}")
                     updateUI(contacts)} })
     }
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        callbacks = null
-    }
+    //Добавление в бд рандомных контактов для отображения при первом запуске
+//    private fun addDefaultContactsToDatabaseForFirstAppStart(){
+//        contactListViewModel.addContact(Contact(firstName = "1st Contact Name", secondName = "1st Contact SecondName", phoneNumber = "+72102102404"))
+//        contactListViewModel.addContact(Contact(firstName = "2st Contact Name", secondName = "2st Contact SecondName", phoneNumber = "+41291212489"))
+//        contactListViewModel.addContact(Contact (firstName = "3st Contact Name", secondName = "3st Contact SecondName", phoneNumber = "+21491287494"))
+//    }
 
     private fun updateUI(contacts: List<Contact>){
         emptyAdapter = EmptyAdapter()
@@ -144,6 +142,11 @@ class ContactListFragment: Fragment() {
         override fun getItemCount(): Int {
             return contact.size
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
     }
 
     companion object{
