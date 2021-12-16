@@ -10,8 +10,8 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import tck.example.andersen_5.classes.Contact
 import tck.example.andersen_5.R
+import tck.example.andersen_5.classes.Contact
 import tck.example.andersen_5.viewModel.ContactViewModel
 import java.util.*
 
@@ -132,9 +132,6 @@ class ContactFragment: Fragment(){
         firstNameEmpty = firstName.text.toString() == ""
         secondNameEmpty = secondName.text.toString() == ""
         phoneNumberEmpty = phoneNumber.text.toString() == ""
-        Log.d("TAG","firstname $firstNameEmpty ${firstName.text.toString()}," +
-                " secondname $secondNameEmpty ${secondName.text.toString()}," +
-                " phonenumber $phoneNumberEmpty ${phoneNumber.text.toString()}")
     }
 
     override fun onDetach() {
